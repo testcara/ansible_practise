@@ -1,0 +1,13 @@
+{
+  "email_address": "user@redhat.com",
+  "enabled": true,
+  "login_name": "user@redhat.com",
+  "organization": "Engineering",
+  "realname": "user",
+  "receives_mail": true,
+  "roles": [
+    "secalert"
+    ],
+  "type": "Person"
+}
+

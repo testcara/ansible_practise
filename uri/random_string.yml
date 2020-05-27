@@ -1,0 +1,8 @@
+- hosts: localhost
+  gather_facts: no
+  vars:
+    name: "{{ 100000 | random }}"
+  tasks:
+  - debug: var=name
+   
+     

@@ -1,0 +1,61 @@
+- hosts: localhost
+  gather_facts: no
+  vars: 
+    name: "{{ account_name }}"
+
+  tasks:
+  - name: Check the webservice can be connected and it returns 200 code
+    uri:
+      url: http://www.baidu.com
+
+  - name: Log in the web service
+    uri:
+      url: https://errata-web-03.host.qe.eng.pek2.redhat.com
+      user: "{{ username }}"
+      password: "{{ password }}"
+      method: GET
+      force_basic_auth: yes
+      return_content: yes
+      status_code: 200
+
+  - name: Get the system_version of the web service
+    uri:
+      url: https://errata-web-03.host.qe.eng.pek2.redhat.com/system_version.txt
+      user: "{{ username }}"
+      password: "{{ password }}"
+      method: GET
+      status_code: 200
+      return_content: yes
+    register: system_version
+
+  - debug:
+      var: system_version.content
+
+  - name: Generate the user json file with random user
+    replace:
+      path: user.json
+      regexp: '(user)'
+      replace: "{{ name }}"
+
+  - name: Create the user of the web service by the web API
+    uri:
+      url: https://errata-web-03.host.qe.eng.pek2.redhat.com/api/v1/user
+      user: "{{ username }}"
+      password: "{{ password }}"
+      method: POST
+      status_code: 201
+      body: "{{  lookup('file', 'user.json') }}"
+      return_content: yes
+      body_format: json
+    register: user_content
+
+  - assert: 
+      that:
+        - '"{{ name}}" in "{{ user_content.json.realname }}"'
+      fail_msg: 'User is not created as expect!'
+ 
+  - name: rever the user.json file
+    replace:
+      path: user.json
+      regexp: "({{ name }})"
+      replace: "user"
